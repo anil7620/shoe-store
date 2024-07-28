@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-gray-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{{ url_for('index') }}" class="text-2xl font-bold">Shoe Store</a>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('view_user_orders') }}" class="hover:underline">Orders</a>
+                <a href="{{ url_for('logout') }}" class="hover:underline">Logout</a>
+                <div class="relative">
+                    <a href="{{ url_for('view_cart') }}" class="hover:underline">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5H3m4 8v6a2 2 0 002 2h10a2 2 0 002-2v-6m-6 4h.01"/>
+                        </svg>
+                        {% if cart_count > 0 %}
+                        <span class="absolute top-0 right-0 inline-block w-4 h-4 bg-red-600 text-white text-xs rounded-full text-center">{{ cart_count }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto mt-8">
+        <h1 class="text-3xl font-bold mb-4">My Orders</h1>
+        <div class="bg-white p-8 rounded-lg shadow-lg">
+            {% if orders %}
+            <table class="min-w-full bg-white">
+                <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b">Order ID</th>
+                        <th class="py-2 px-4 border-b">Total</th>
+                        <th class="py-2 px-4 border-b">Status</th>
+                        <th class="py-2 px-4 border-b">Created At</th>
+                        <th class="py-2 px-4 border-b">Items</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td class="py-2 px-4 border-b">{{ order._id }}</td>
+                        <td class="py-2 px-4 border-b">${{ "%.2f"|format(order.total) }}</td>
+                        <td class="py-2 px-4 border-b">{{ order.status }}</td>
+                        <td class="py-2 px-4 border-b">{{ order.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                        <td class="py-2 px-4 border-b">
+                            <ul>
+                                {% for item in order.product_details %}
+                                <li>
+                                    {{ item.shoe_name }} - Quantity: {{ item.quantity }}<br>
+                                    Color: {{ item.variant_color }}, Size: {{ item.variant_size }}, Gender: {{ item.variant_gender }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-gray-700">You have no orders.</p>
+            {% endif %}
+        </div>
+        <div class="mt-4">
+            <a href="{{ url_for('index') }}" class="bg-gray-600 text-white px-4 py-2 rounded-lg">Continue Shopping</a>
+        </div>
+    </main>
+</body>
+</html>

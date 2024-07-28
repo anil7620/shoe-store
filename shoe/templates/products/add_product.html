@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Shoe</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex">
+    <!-- Sidebar -->
+    <aside class="bg-gray-600 text-white w-64 min-h-screen p-4">
+        <div class="flex items-center justify-center mb-6">
+            <img src="https://source.unsplash.com/featured/?shoe-logo" alt="Shoe Logo" class="h-16 w-16 object-cover rounded-full">
+        </div>
+        <nav>
+            <ul class="space-y-4">
+                <li>
+                    <a href="{{ url_for('view_products') }}" class="block px-4 py-2 rounded {{ 'bg-blue-700' if request.endpoint == 'view_products' else '' }}">Shoes</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('view_categories') }}" class="block px-4 py-2 rounded {{ 'bg-blue-700' if request.endpoint == 'view_categories' else '' }}">Categories</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('admin_view_orders') }}" class="block px-4 py-2 rounded {{ 'bg-blue-700' if request.endpoint == 'admin_view_orders' else '' }}">View Orders</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('logout') }}" class="block px-4 py-2 rounded {{ 'bg-blue-700' if request.endpoint == 'logout' else '' }}">Logout</a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-3xl font-bold">Add Shoe</h1>
+        </div>
+        <form action="{{ url_for('add_product') }}" method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md">
+            <div class="mb-4">
+                <label for="shoe_name" class="block text-gray-700">Shoe Name</label>
+                <input type="text" id="shoe_name" name="shoe_name" class="w-full px-3 py-2 border rounded-lg" required>
+            </div>
+            <div class="mb-4">
+                <label for="brand" class="block text-gray-700">Brand</label>
+                <input type="text" id="brand" name="brand" class="w-full px-3 py-2 border rounded-lg" required>
+            </div>
+            <div class="mb-4">
+                <label for="description" class="block text-gray-700">Description</label>
+                <textarea id="description" name="description" class="w-full px-3 py-2 border rounded-lg" rows="4" required></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="status" class="block text-gray-700">Status</label>
+                <select id="status" name="status" class="w-full px-3 py-2 border rounded-lg" required>
+                    <option value="available">Available</option>
+                    <option value="unavailable">Unavailable</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="category" class="block text-gray-700">Category</label>
+                <select id="category" name="category" class="w-full px-3 py-2 border rounded-lg" required>
+                    {% for category in categories %}
+                    <option value="{{ category._id }}">{{ category.category_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="image_url" class="block text-gray-700">Image URL</label>
+                <input type="url" id="image_url" name="image_url" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700">Shipping Methods</label>
+                <div class="flex items-center mb-2">
+                    <input type="checkbox" id="pickup" name="shipping_method" value="pickup" class="mr-2">
+                    <label for="pickup">Pickup</label>
+                </div>
+                <div class="flex items-center mb-2">
+                    <input type="checkbox" id="online" name="shipping_method" value="online" class="mr-2">
+                    <label for="online">Online</label>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="cost" class="block text-gray-700">Cost</label>
+                <input type="number" id="cost" name="cost" class="w-full px-3 py-2 border rounded-lg" required>
+            </div>
+            <div id="variants">
+                <h2 class="text-xl font-bold mb-4">Shoe Variants</h2>
+                <div class="variant mb-4">
+                    <div class="mb-4">
+                        <label for="size" class="block text-gray-700">Size</label>
+                        <input type="text" id="size" name="size[]" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="gender" class="block text-gray-700">Gender</label>
+                        <input type="text" id="gender" name="gender[]" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="stock" class="block text-gray-700">Stock</label>
+                        <input type="number" id="stock" name="stock[]" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="color" class="block text-gray-700">Color</label>
+                        <input type="text" id="color" name="color[]" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="variant_status" class="block text-gray-700">Status</label>
+                        <select id="variant_status" name="variant_status[]" class="w-full px-3 py-2 border rounded-lg" required>
+                            <option value="available">Available</option>
+                            <option value="unavailable">Unavailable</option>
+                        </select>
+                    </div>
+                    <button type="button" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 remove-variant">Remove Variant</button>
+                </div>
+            </div>
+            <button type="button" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" id="add-variant">Add Variant</button>
+            <div class="flex justify-between mt-6">
+                <a href="{{ url_for('view_products') }}" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Go Back</a>
+                <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Add Shoe</button>
+            </div>
+        </form>
+    </main>
+    <script>
+        document.getElementById('add-variant').addEventListener('click', function () {
+            let variantTemplate = document.querySelector('.variant').cloneNode(true);
+            variantTemplate.querySelectorAll('input').forEach(input => input.value = '');
+            document.getElementById('variants').appendChild(variantTemplate);
+        });
+
+        document.getElementById('variants').addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-variant')) {
+                e.target.closest('.variant').remove();
+            }
+        });
+    </script>
+</body>
+</html>

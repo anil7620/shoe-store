@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-gray-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{{ url_for('index') }}" class="text-2xl font-bold">Shoe Store</a>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('view_user_orders') }}" class="hover:underline">Orders</a>
+                <a href="{{ url_for('logout') }}" class="hover:underline">Logout</a>
+                <div class="relative">
+                    <a href="{{ url_for('view_cart') }}" class="hover:underline">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5H3m4 8v6a2 2 0 002 2h10a2 2 0 002-2v-6m-6 4h.01"/>
+                        </svg>
+                        {% if cart_count > 0 %}
+                        <span class="absolute top-0 right-0 inline-block w-4 h-4 bg-red-600 text-white text-xs rounded-full text-center">{{ cart_count }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto mt-8">
+        <h1 class="text-3xl font-bold mb-4">Checkout</h1>
+        {% if products %}
+        <div class="bg-white p-8 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-2">Order Summary</h2>
+            <div class="mb-4">
+                <form action="{{ url_for('checkout') }}" method="POST">
+                    {% for product in products %}
+                    <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
+                        <img src="{{ product.product.image }}" alt="{{ product.product.shoe_name }}" class="h-48 w-full object-cover rounded-t-lg">
+                        <h2 class="text-xl font-bold mt-2">{{ product.product.shoe_name }}</h2>
+                        <p class="text-gray-700 mt-1">Price: ${{ product.product.cost }}</p>
+                        <p class="text-gray-700 mt-1">Quantity: {{ product.quantity }}</p>
+                        <p class="text-gray-700 mt-1">Size: {{ product.variant.size }}</p>
+                        <p class="text-gray-700 mt-1">Color: {{ product.variant.color }}</p>
+                        <p class="text-gray-700 mt-1">Total: ${{ "%.2f"|format(product.subtotal) }}</p>
+                    </div>
+                    {% endfor %}
+                    <div class="mb-4">
+                        <p class="text-gray-700">Total Cost: ${{ "%.2f"|format(total_cost) }}</p>
+                        <p class="text-gray-700">Tax (10%): ${{ "%.2f"|format(total_tax) }}</p>
+                        <p class="text-gray-700">Total Payable: ${{ "%.2f"|format(total_payable) }}</p>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-4">Shipping Method</h2>
+                    <div class="mb-4">
+                        <ul>
+                        {% for method in products[0].product.shipping_methods %}
+                            <li>
+                                <input type="radio" id="shipping_method_{{ loop.index }}" name="shipping_method" value="{{ method }}" required>
+                                <label for="shipping_method_{{ loop.index }}">{{ method }}</label>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-4">Payment Information</h2>
+                    <div class="mb-4">
+                        <label for="card_number" class="block text-gray-700">Card Number</label>
+                        <input type="text" id="card_number" name="card_number" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="expiry_date" class="block text-gray-700">Expiry Date</label>
+                        <input type="text" id="expiry_date" name="expiry_date" class="w-full px-3 py-2 border rounded-lg" placeholder="MM/YY" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="cvv" class="block text-gray-700">CVV</label>
+                        <input type="text" id="cvv" name="cvv" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="name_on_card" class="block text-gray-700">Name on Card</label>
+                        <input type="text" id="name_on_card" name="name_on_card" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Submit Payment</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-gray-700">Your cart is empty.</p>
+        <a href="{{ url_for('index') }}" class="bg-gray-600 text-white px-4 py-2 rounded-lg">Continue Shopping</a>
+        {% endif %}
+    </main>
+</body>
+</html>

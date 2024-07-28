@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoe Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-gray-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{{ url_for('index') }}" class="text-2xl font-bold">Shoe Store</a>
+            <div class="flex items-center space-x-4">
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('view_user_orders') }}" class="hover:underline">Orders</a>
+                    <a href="{{ url_for('logout') }}" class="hover:underline">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('user_login') }}" class="hover:underline">User Login</a>
+                    <a href="{{ url_for('register_user') }}" class="hover:underline">User Register</a>
+                    <a href="{{ url_for('admin_login') }}" class="hover:underline">Admin Login</a>
+                {% endif %}
+                <div class="relative">
+                    <a href="{{ url_for('view_cart') }}" class="hover:underline">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5H3m4 8v6a2 2 0 002 2h10a2 2 0 002-2v-6m-6 4h.01"/>
+                        </svg>
+                        {% if cart_count > 0 %}
+                        <span class="absolute top-0 right-0 inline-block w-4 h-4 bg-red-600 text-white text-xs rounded-full text-center">{{ cart_count }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- Main Content -->
+    <main class="container mx-auto mt-8">
+        <h1 class="text-3xl font-bold mb-4">Our Shoes</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for product in products %}
+            <div class="bg-white p-4 rounded-lg shadow-lg">
+                <img src="{{ product.image }}" alt="{{ product.shoe_name }}" class="h-48 w-full object-cover rounded-t-lg">
+                <h2 class="text-xl font-bold mt-2">{{ product.shoe_name }}</h2>
+                <p class="text-gray-700 mt-1">${{ product.cost }}</p>
+                <div class="flex space-x-2 mt-2">
+                    {% if product.variants %}
+                    <a href="{{ url_for('view_product', product_id=product._id) }}" class="bg-gray-600 text-white px-4 py-2 rounded-lg">View</a>
+                    <form action="{{ url_for('add_to_cart', product_id=product._id) }}" method="POST" class="flex items-center space-x-2">
+                        <select name="variant_id" class="border border-gray-300 rounded-lg p-2">
+                            {% for variant in product.variants %}
+                            <option value="{{ variant._id }}">Size: {{ variant.size }}, Color: {{ variant.color }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded-lg">Add</button>
+                    </form>
+                    {% else %}
+                    <button class="bg-red-600 text-white px-4 py-2 rounded-lg cursor-not-allowed" disabled>Out of Stock</button>
+                    {% endif %}
+                </div>
+                <div class="mt-4">
+                    <h3 class="text-lg font-bold">Variants</h3>
+                    <ul>
+                        {% for variant in product.variants %}
+                        <li class="text-gray-600">Size: {{ variant.size }}, Gender: {{ variant.gender }}, Stock: {{ variant.stock }}, Color: {{ variant.color }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>

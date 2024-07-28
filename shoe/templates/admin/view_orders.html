@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - View Orders</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex">
+    <!-- Sidebar -->
+    <aside class="bg-gray-600 text-white w-64 min-h-screen p-4">
+        <div class="flex items-center justify-center mb-6">
+            <img src="https://source.unsplash.com/featured/?shoe-logo" alt="Shoe Logo" class="h-16 w-16 object-cover rounded-full">
+        </div>
+        <nav>
+            <ul class="space-y-4">
+                <li>
+                    <a href="{{ url_for('admin_dashboard') }}" class="block px-4 py-2 rounded {{ 'bg-blue-700' if request.endpoint == 'admin_dashboard' else '' }}">Shoes</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('view_categories') }}" class="block px-4 py-2 rounded {{ 'bg-blue-700' if request.endpoint == 'view_categories' else '' }}">Categories</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('admin_view_orders') }}" class="block px-4 py-2 rounded {{ 'bg-blue-700' if request.endpoint == 'admin_view_orders' else '' }}">View Orders</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('logout') }}" class="block px-4 py-2 rounded {{ 'bg-blue-700' if request.endpoint == 'logout' else '' }}">Logout</a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-3xl font-bold">All Orders</h1>
+        </div>
+        <div class="bg-white p-8 rounded-lg shadow-lg">
+            {% if orders %}
+            <table class="min-w-full bg-white">
+                <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b">Order ID</th>
+                        <th class="py-2 px-4 border-b">User Name</th>
+                        <th class="py-2 px-4 border-b">Total</th>
+                        <th class="py-2 px-4 border-b">Status</th>
+                        <th class="py-2 px-4 border-b">Created At</th>
+                        <th class="py-2 px-4 border-b">Shipping Method</th>
+                        <th class="py-2 px-4 border-b">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td class="py-2 px-4 border-b">{{ order._id }}</td>
+                        <td class="py-2 px-4 border-b">{{ order.user_name }}</td>
+                        <td class="py-2 px-4 border-b">${{ "%.2f"|format(order.total) }}</td>
+                        <td class="py-2 px-4 border-b">{{ order.status }}</td>
+                        <td class="py-2 px-4 border-b">{{ order.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                        <td class="py-2 px-4 border-b">{{ order.shipping_method }}</td>
+                        <td class="py-2 px-4 border-b">
+                            <form action="{{ url_for('admin_view_orders') }}" method="POST" class="inline-block">
+                                <input type="hidden" name="order_id" value="{{ order._id }}">
+                                <select name="status" class="px-2 py-1 border rounded-lg">
+                                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                                    <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                    <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                                <button type="submit" class="bg-gray-600 text-white px-2 py-1 rounded-lg hover:bg-blue-700">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-gray-700">There are no orders.</p>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>

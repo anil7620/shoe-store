@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-gray-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{{ url_for('index') }}" class="text-2xl font-bold">Shoe Store</a>
+            <div class="flex items-center space-x-4">
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('view_user_orders') }}" class="hover:underline">Orders</a>
+                    <a href="{{ url_for('logout') }}" class="hover:underline">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('user_login') }}" class="hover:underline">User Login</a>
+                    <a href="{{ url_for('register_user') }}" class="hover:underline">User Register</a>
+                    <a href="{{ url_for('admin_login') }}" class="hover:underline">Admin Login</a>
+                {% endif %}
+                <div class="relative">
+                    <a href="{{ url_for('view_cart') }}" class="hover:underline">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5H3m4 8v6a2 2 0 002 2h10a2 2 0 002-2v-6m-6 4h.01"/>
+                        </svg>
+                        {% if cart_count > 0 %}
+                        <span class="absolute top-0 right-0 inline-block w-4 h-4 bg-red-600 text-white text-xs rounded-full text-center">{{ cart_count }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="container mx-auto mt-4">
+                    <div class="bg-{{ category }}-600 text-red px-4 py-2 rounded-lg">
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="container mx-auto mt-8">
+        <h1 class="text-3xl font-bold mb-4">Your Cart</h1>
+        {% if products %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for item in products %}
+            <div class="bg-white p-4 rounded-lg shadow-lg">
+                <img src="{{ item.product.image }}" alt="{{ item.product.shoe_name }}" class="h-48 w-full object-cover rounded-t-lg">
+                <h2 class="text-xl font-bold mt-2">{{ item.product.shoe_name }}</h2>
+                <p class="text-gray-700 mt-1">Price: ${{ item.product.cost }}</p> <!-- Display product cost -->
+                <p class="text-gray-700 mt-1">Quantity: {{ item.product.quantity }}</p>
+                <p class="text-gray-700 mt-1">Total: ${{ "%.2f"|format(item.product_total) }}</p>
+                <div class="flex space-x-2 mt-2">
+                    <form action="{{ url_for('increase_quantity', variant_id=item.variant._id) }}" method="POST">
+                        <button type="submit" class="bg-gray-600 text-white px-2 py-1 rounded-lg">+</button>
+                    </form>
+                    <form action="{{ url_for('decrease_quantity', variant_id=item.variant._id) }}" method="POST">
+                        <button type="submit" class="bg-yellow-600 text-white px-2 py-1 rounded-lg">-</button>
+                    </form>
+                    <form action="{{ url_for('remove_from_cart', variant_id=item.variant._id) }}" method="POST">
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg">Remove</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-4 p-4 bg-white rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-2">Order Summary</h2>
+            <p class="text-gray-700">Total Cost: ${{ "%.2f"|format(total_cost) }}</p>
+            <p class="text-gray-700">Tax (10%): ${{ "%.2f"|format(total_tax) }}</p>
+            <p class="text-gray-700">Total Payable: ${{ "%.2f"|format(total_payable) }}</p>
+        </div>
+        {% else %}
+        <p class="text-gray-700">Your cart is empty.</p>
+        {% endif %}
+        <div class="mt-4">
+            <a href="{{ url_for('index') }}" class="bg-gray-600 text-white px-4 py-2 rounded-lg">Continue Shopping</a>
+        </div>
+        <div class="mt-4">
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('checkout') }}" class="bg-gray-600 text-white px-4 py-2 rounded-lg">Proceed to Checkout</a>
+            {% else %}
+                <a href="{{ url_for('user_login', next=url_for('view_cart')) }}" class="bg-yellow-600 text-white px-4 py-2 rounded-lg">Login to Checkout</a>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>
