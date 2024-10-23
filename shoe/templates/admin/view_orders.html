@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - View Orders</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/kTc+9FfCLhVJj6MY26YJl5M1t4GnL7yoj7RC1Q5uPqkuFV69Wr8ldQcSRdgo8cM/Mh58HW8Yc3nbA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-gray-100 flex">
+    <!-- Sidebar -->
+    <aside class="bg-blue-600 text-white w-64 min-h-screen p-4">
+      
+        <nav>
+            <ul class="space-y-4">
+                <li>
+                    <a href="{{ url_for('admin_dashboard') }}" class="flex items-center px-4 py-2 rounded hover:bg-blue-700 {{ 'bg-blue-700' if request.endpoint == 'admin_dashboard' else '' }}">
+                        <i class="fas fa-shoe-prints mr-2"></i>Shoes
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('view_categories') }}" class="flex items-center px-4 py-2 rounded hover:bg-blue-700 {{ 'bg-blue-700' if request.endpoint == 'view_categories' else '' }}">
+                        <i class="fas fa-tags mr-2"></i>Categories
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('admin_view_orders') }}" class="flex items-center px-4 py-2 rounded hover:bg-blue-700 {{ 'bg-blue-700' if request.endpoint == 'admin_view_orders' else '' }}">
+                        <i class="fas fa-shopping-cart mr-2"></i>View Orders
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('logout') }}" class="flex items-center px-4 py-2 rounded hover:bg-blue-700">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6">
+        <!-- Page Header -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">All Orders</h1>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
+            {% if orders %}
+            <table class="min-w-full bg-white rounded-lg shadow overflow-hidden">
+                <thead class="bg-blue-600 text-white">
+                    <tr>
+                        <th class="px-6 py-3 text-left font-medium">Order ID</th>
+                        <th class="px-6 py-3 text-left font-medium">Buyer Name</th>
+                        <th class="px-6 py-3 text-left font-medium">Total</th>
+                        <th class="px-6 py-3 text-left font-medium">Status</th>
+                        <th class="px-6 py-3 text-left font-medium">Created At</th>
+                        <th class="px-6 py-3 text-left font-medium">Shipping Method</th>
+                        <th class="px-6 py-3 text-left font-medium">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                    {% for order in orders %}
+                    <tr class="hover:bg-gray-100">
+                        <td class="border px-6 py-4">{{ order._id }}</td>
+                        <td class="border px-6 py-4">{{ order.buyer_name }}</td>
+                        <td class="border px-6 py-4">${{ "%.2f"|format(order.total) }}</td>
+                        <td class="border px-6 py-4">{{ order.status }}</td>
+                        <td class="border px-6 py-4">{{ order.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                        <td class="border px-6 py-4">{{ order.shipping_method }}</td>
+                        <td class="border px-6 py-4">
+                            <!-- Status Update Form -->
+                            <form action="{{ url_for('admin_view_orders') }}" method="POST" class="flex items-center space-x-2">
+                                <input type="hidden" name="order_id" value="{{ order._id }}">
+                                <select name="status" class="px-2 py-1 border rounded-lg focus:ring focus:ring-blue-500">
+                                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                                    <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                    <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                                <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 flex items-center">
+                                    <i class="fas fa-sync-alt mr-1"></i>Update
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-gray-700 mt-4">There are no orders.</p>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>

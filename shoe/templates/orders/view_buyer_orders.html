@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-blue-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{{ url_for('index') }}" class="text-2xl font-bold">Shoe Store</a>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('view_buyer_orders') }}" class="hover:underline">Orders</a>
+                <a href="{{ url_for('logout') }}" class="hover:underline">Logout</a>
+                <div class="relative">
+                    <a href="{{ url_for('view_cart') }}" class="hover:underline">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5H3m4 8v6a2 2 0 002 2h10a2 2 0 002-2v-6m-6 4h.01"/>
+                        </svg>
+                        {% if cart_count > 0 %}
+                        <span class="absolute top-0 right-0 inline-block w-5 h-5 bg-red-600 text-white text-xs rounded-full flex items-center justify-center">{{ cart_count }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto mt-8">
+        <h1 class="text-3xl font-bold mb-6">My Orders</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            {% if orders %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="py-3 px-4 text-left font-medium text-gray-700 border-b">Order ID</th>
+                            <th class="py-3 px-4 text-left font-medium text-gray-700 border-b">Total</th>
+                            <th class="py-3 px-4 text-left font-medium text-gray-700 border-b">Status</th>
+                            <th class="py-3 px-4 text-left font-medium text-gray-700 border-b">Created At</th>
+                            <th class="py-3 px-4 text-left font-medium text-gray-700 border-b">Items</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr class="hover:bg-gray-100">
+                            <td class="py-4 px-4 border-b text-blue-600 font-semibold">{{ order._id }}</td>
+                            <td class="py-4 px-4 border-b text-gray-800">${{ "%.2f"|format(order.total) }}</td>
+                            <td class="py-4 px-4 border-b">
+                                <span class="inline-block px-2 py-1 rounded-full text-sm 
+                                    {% if order.status == 'Delivered' %} bg-green-200 text-green-800 
+                                    {% elif order.status == 'Pending' %} bg-yellow-200 text-yellow-800 
+                                    {% elif order.status == 'Cancelled' %} bg-red-200 text-red-800 
+                                    {% else %} bg-gray-200 text-gray-800 {% endif %}">
+                                    {{ order.status }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-4 border-b text-gray-700">{{ order.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                            <td class="py-4 px-4 border-b">
+                                <div class="space-y-2">
+                                    {% for item in order.shoe_details %}
+                                    <div class="bg-gray-100 p-2 rounded-lg">
+                                        <p class="text-gray-800 font-semibold">{{ item.shoe_name }} - Qty: {{ item.quantity }}</p>
+                                        <p class="text-gray-600 text-sm">Color: {{ item.variant_color }}, Size: {{ item.variant_size }}, Gender: {{ item.variant_gender }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-700">You have no orders.</p>
+            {% endif %}
+        </div>
+
+        <div class="mt-6">
+            <a href="{{ url_for('index') }}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">Continue Shopping</a>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoe Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{{ url_for('index') }}" class="text-2xl font-bold text-gray-700">Shoe Store</a>
+        
+            <!-- User Options -->
+            <div class="flex items-center space-x-4">
+                {% if session.get('buyer_id') %}
+                    <a href="{{ url_for('view_buyer_orders') }}" class="text-gray-700 hover:text-gray-900">Orders</a>
+                    <a href="{{ url_for('logout') }}" class="text-gray-700 hover:text-gray-900">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('buyer_login') }}" class="text-gray-700 hover:text-gray-900">Buyer Login</a>
+                    <a href="{{ url_for('register_buyer') }}" class="text-gray-700 hover:text-gray-900">Register</a>
+                    <a href="{{ url_for('admin_login') }}" class="text-gray-700 hover:text-gray-900">Admin Login</a>
+                {% endif %}
+                <!-- Cart Icon -->
+                <div class="relative">
+                    <a href="{{ url_for('view_cart') }}" class="hover:text-gray-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5H3m4 8v6a2 2 0 002 2h10a2 2 0 002-2v-6m-6 4h.01"/>
+                        </svg>
+                        {% if cart_count > 0 %}
+                        <span class="absolute top-0 right-0 w-5 h-5 bg-red-600 text-white text-xs rounded-full flex items-center justify-center">{{ cart_count }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto mt-6 flex">
+        <!-- Sidebar for Filters -->
+<!-- Sidebar for Filters -->
+<aside class="hidden md:block w-1/4 p-4 bg-white shadow-lg rounded-lg">
+    <h2 class="text-lg font-bold mb-4">Filters</h2>
+
+    <form action="{{ url_for('index') }}" method="get">
+        <!-- Category Filter -->
+        <div class="mb-4">
+            <h3 class="font-semibold">Category</h3>
+            <ul class="space-y-2">
+                {% for category in categories %}
+                <li>
+                    <input type="checkbox" name="category" value="{{ category._id }}" class="mr-2"
+                    {% if category._id in request.args.getlist('category') %} checked {% endif %}> 
+                    {{ category.category_name }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Price Range Filter -->
+        <div class="mb-4">
+            <h3 class="font-semibold">Price Range</h3>
+            <input type="range" name="max_price" min="0" max="100" value="{{ request.args.get('max_price', 100) }}"
+                   class="w-full mt-2">
+            <span>Max Price: ${{ request.args.get('max_price', 100) }}</span>
+        </div>
+
+        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Apply Filters</button>
+    </form>
+</aside>
+
+
+        <!-- Product Grid -->
+        <main class="w-full md:w-3/4 p-4">
+            <!-- Featured Products -->
+            <section class="mb-8">
+                <h1 class="text-2xl font-bold mb-4">Featured Products</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for shoe in featured_shoes %}
+                    <div class="bg-white p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                        <img src="{{ shoe.image }}" alt="{{ shoe.shoe_name }}" class="h-48 w-full object-cover rounded-lg mb-2">
+                        <h2 class="text-lg font-semibold">{{ shoe.shoe_name }}</h2>
+                        <p class="text-gray-600 mt-1">${{ shoe.cost }}</p>
+                        <a href="{{ url_for('view_shoe', shoe_id=shoe._id) }}" 
+                           class="block mt-2 text-center bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600">View</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- All Shoes -->
+            <section>
+                <h1 class="text-2xl font-bold mb-4">Our Shoes</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for shoe in shoes %}
+                    <div class="bg-white p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                        <img src="{{ shoe.image }}" alt="{{ shoe.shoe_name }}" class="h-48 w-full object-cover rounded-lg mb-2">
+                        <h2 class="text-lg font-semibold">{{ shoe.shoe_name }}</h2>
+                        <p class="text-gray-600 mt-1">${{ shoe.cost }}</p>
+                        <a href="{{ url_for('view_shoe', shoe_id=shoe._id) }}" 
+                           class="block mt-2 text-center bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600">View</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </main>
+    </div>
+    <script>
+        document.querySelectorAll('input[type="checkbox"], input[type="range"]').forEach(input => {
+            input.addEventListener('change', () => {
+                document.querySelector('form').submit();
+            });
+        });
+    </script>
+    
+</body>
+</html>

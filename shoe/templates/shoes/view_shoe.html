@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Your Store</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='includes.css') }}">
+</head>
+
+<body class="flex flex-col min-h-screen bg-gray-100">
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <a href="{{ url_for('index') }}" class="text-2xl font-bold text-gray-800">Shoe Store</a>
+      <div class="flex items-center space-x-4">
+        {% if session.get('buyer_id') %}
+          <a href="{{ url_for('view_buyer_orders') }}" class="text-gray-600 hover:text-gray-800">Orders</a>
+          <a href="{{ url_for('logout') }}" class="text-gray-600 hover:text-gray-800">Logout</a>
+        {% else %}
+          <a href="{{ url_for('buyer_login') }}" class="text-gray-600 hover:text-gray-800">Buyer Login</a>
+          <a href="{{ url_for('register_buyer') }}" class="text-gray-600 hover:text-gray-800">Register</a>
+          <a href="{{ url_for('admin_login') }}" class="text-gray-600 hover:text-gray-800">Admin Login</a>
+        {% endif %}
+        <!-- Cart Icon -->
+        <div class="relative">
+          <a href="{{ url_for('view_cart') }}" class="hover:text-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5H3m4 8v6a2 2 0 002 2h10a2 2 0 002-2v-6m-6 4h.01"/>
+            </svg>
+            {% if cart_count > 0 %}
+            <span class="absolute top-0 right-0 w-5 h-5 bg-red-600 text-white text-xs rounded-full flex items-center justify-center">{{ cart_count }}</span>
+            {% endif %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col">
+    <div class="font-sans bg-white p-8 lg:max-w-5xl max-w-2xl mx-auto mt-8 rounded-lg shadow-lg">
+      <div class="grid items-start grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Product Image -->
+        <div class="w-full lg:sticky top-0 flex justify-center p-4">
+          <img src="{{ shoe.image }}" alt="{{ shoe.shoe_name }}" class="h-72 w-full object-contain rounded-lg shadow-md">
+        </div>
+        <!-- Product Info -->
+        <div>
+          <h2 class="text-3xl font-extrabold text-gray-800">{{ shoe.shoe_name }}</h2>
+          <p id="shoe-cost" class="text-2xl text-gray-800 font-semibold mt-4">${{ shoe.cost }}</p>
+          <div class="mt-6">
+            <h3 class="text-lg font-bold text-gray-800">About the Item</h3>
+            <p class="mt-2 text-gray-600">{{ shoe.description }}</p>
+          </div>
+          <div class="mt-6">
+            <form action="{{ url_for('add_to_cart', shoe_id=shoe._id) }}" method="post">
+              <!-- Variant Selections -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Color Selector -->
+                <div class="relative border p-4 rounded-md bg-gray-50">
+                  <label for="color" class="block text-sm font-medium text-gray-700">Color</label>
+                  <select id="color" name="color" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md">
+                    {% for variant in shoe.variants %}
+                      <option value="{{ variant.color }}">{{ variant.color }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <!-- Size Selector -->
+                <div class="relative border p-4 rounded-md bg-gray-50">
+                  <label for="size" class="block text-sm font-medium text-gray-700">Size</label>
+                  <select id="size" name="size" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md">
+                    <!-- Sizes populated dynamically -->
+                  </select>
+                </div>
+                <!-- Gender Selector -->
+                <div class="relative border p-4 rounded-md bg-gray-50">
+                  <label for="gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                  <select id="gender" name="gender" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md">
+                    <!-- Genders populated dynamically -->
+                  </select>
+                </div>
+              </div>
+              <!-- Quantity Selector -->
+              <div class="mt-4">
+                <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
+                <input type="number" id="quantity" name="quantity" min="1" value="1" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md bg-gray-50">
+              </div>
+              <!-- Add to Cart Button -->
+              <button type="submit" class="mt-4 w-full sm:w-auto px-6 py-2 bg-yellow-500 text-white font-bold rounded hover:bg-yellow-600 transition-colors duration-150 ease-in-out text-center">
+                Add to Cart
+              </button>
+            </form>
+          </div>
+          <br>
+          <!-- Back to All Shoes Button -->
+          <a href="{{ url_for('get_all_shoes') }}" class="mt-6 w-full sm:w-auto px-6 py-2 border border-yellow-500 text-gray-800 font-bold rounded hover:bg-yellow-100 transition-colors duration-150 ease-in-out text-center">
+            Back to All Shoes
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t mt-auto py-4 text-center">
+      <p class="text-gray-600">Your Store &copy; 2024. All Rights Reserved.</p>
+    </footer>
+  </div>
+
+  <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          const shoeId = "{{ shoe._id }}";
+          const colorSelect = document.getElementById('color');
+          const sizeSelect = document.getElementById('size');
+          const genderSelect = document.getElementById('gender');
+          const shoeCost = document.getElementById('shoe-cost');
+
+          function fetchAndUpdateSizes() {
+              const color = colorSelect.value;
+              fetch(`/get-variant-info?color=${color}&shoeId=${shoeId}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      if (data.success) {
+                          updateDropdown(sizeSelect, data.sizes);
+                          sizeSelect.dispatchEvent(new Event('change'));
+                      }
+                  }).catch(error => console.error('Error:', error));
+          }
+
+          function fetchAndUpdateGenders() {
+              const color = colorSelect.value;
+              const size = sizeSelect.value;
+              if (size) {
+                  fetch(`/get-variant-info?color=${color}&size=${size}&shoeId=${shoeId}`)
+                      .then(response => response.json())
+                      .then(data => {
+                          if (data.success) {
+                              updateDropdown(genderSelect, data.genders);
+                              genderSelect.dispatchEvent(new Event('change'));
+                          }
+                      }).catch(error => console.error('Error:', error));
+              }
+          }
+
+          function fetchAndUpdateCost() {
+              const color = colorSelect.value;
+              const size = sizeSelect.value;
+              const gender = genderSelect.value;
+              if (size && gender) {
+                  fetch(`/get-variant-info?color=${color}&size=${size}&gender=${gender}&shoeId=${shoeId}`)
+                      .then(response => response.json())
+                      .then(data => {
+                          if (data.success && data.cost) {
+                              shoeCost.textContent = `$${data.cost}`;
+                          }
+                      }).catch(error => console.error('Error:', error));
+              }
+          }
+
+          function updateDropdown(selectElement, options) {
+              selectElement.innerHTML = '';
+              options.forEach(option => {
+                  const optionElement = new Option(option, option);
+                  selectElement.add(optionElement);
+              });
+          }
+
+          colorSelect.addEventListener('change', fetchAndUpdateSizes);
+          sizeSelect.addEventListener('change', fetchAndUpdateGenders);
+          genderSelect.addEventListener('change', fetchAndUpdateCost);
+
+          // Initial load
+          fetchAndUpdateSizes();
+      });
+  </script>
+</body>
+</html>
